@@ -1,5 +1,7 @@
 const express = require('express');
 const { animals } = require('./data/animals');
+const fs = require('fs');
+const path = require('path');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -40,8 +42,14 @@ function findById(id, animalsArray) {
 }
 
 function createNewAnimal(body, animalsArray) {
-  console.log(body);
-  return body;
+  const animal = body;
+  animalsArray.push(animal);
+  fs.writeFileSync(
+    path.join(__dirname, './data/animals.json'),
+    JSON.stringify({ animals: animalsArray }, null, 2)
+  );
+
+  return animal;
 }
 
 app.get('/api/animals', (req, res) => {
@@ -63,8 +71,10 @@ app.get('/api/animals/:id', (req, res) => {
 
 app.post('/api/animals', (req, res) => {
   req.body.id = animals.length.toString();
-  
-  res.json(req.body);
+
+  const animal = createNewAnimal(req.body, animals);
+
+  res.json(animal);
 });
 
 app.listen(PORT, () => {
